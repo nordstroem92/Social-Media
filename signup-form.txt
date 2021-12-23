@@ -1,0 +1,9 @@
+<h3>Sign me up!</h3>
+</br>
+<form class="form-group" action="includes/signup-function.php" method="POST">
+	<input class="form-control" type="text" name="firstname" placeholder="Enter your first name"></br>
+	<input class="form-control" type="text" name="lastname" placeholder="Enter your last name"></br>
+	<input class="form-control" type="text" name="signup-email" placeholder="Enter your e-mail"></br>
+	<input class="form-control" type="password" name="signup-password" placeholder="Enter your password"></br>
+	<button class="btn btn-info" type="submit" name="signup-submit">Sign up</button>
+</form>

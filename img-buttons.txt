@@ -1,0 +1,11 @@
+
+<div id="test-div">
+	<form action="includes/upload-img-function.php" method="POST" enctype="multipart/form-data">
+		<input type="file" name="file">
+		<button class="btn btn-primary" type="submit" name="profile-img-submit">Upload</button>
+	</form>
+
+	<form action="includes/delete-img-function.php" method="POST">
+		<button class="btn btn-primary" type="submit" name="delete-submit">Delete</button>
+	</form>
+</div>

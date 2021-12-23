@@ -1,0 +1,53 @@
+a {
+	color: black;
+	text-decoration: none;
+}
+
+.btn-link {
+	color: black;
+	text-decoration: none;
+}
+
+.btn-link:hover {
+	color: black;
+	text-decoration: none;
+}
+
+.badge-info a{
+	color: white;
+}
+
+.badge:hover {
+	cursor:pointer;
+}
+
+body {
+  overflow-y: scroll;
+}
+
+#comment-textarea {
+	max-width: 80%;
+	display: block;
+	float: left;
+}
+
+.clickable:hover {
+	background-color: red;
+}
+
+.custom-container{
+	padding: 0px 60px;
+	margin-bottom: 20px;
+}
+
+#user-info {
+    position:fixed;
+    top: 80px;
+}
+.nav-item a {
+	color: white;
+}
+
+.time-tag:hover {
+	cursor: help;
+}

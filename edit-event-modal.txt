@@ -1,0 +1,203 @@
+<!--modal-->
+<div class="modal fade" id="testEventModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit event</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	     <form id="myform" class="form-group" action="includes/edit-event-function.php" method="POST">
+			<input class="form-control" type="text" name="event-location" placeholder="Location" value=""></br>
+			<input class="form-control" type="date" name="event-date" placeholder="Date" value=""></br>
+			<input class="form-control" type="time" name="event-time" placeholder="Time" value=""></br>
+			<span id="sport-label" class="badge badge-info category-label">Sport <i class="fa fa-heartbeat" aria-hidden="true"></i></span>
+			<span id="art-label"class="badge badge-info category-label">Art <i class="fa fa-paint-brush" aria-hidden="true"></i></span>
+			<span id="food-label"class="badge badge-info category-label">Food <i class="fa fa-birthday-cake" aria-hidden="true"></i></span>
+			<span id="learning-label"class="badge badge-info category-label">Learning <i class="fa fa-university" aria-hidden="true"></i></span>
+      <input type="hidden" id="event-category" name="event-category" value="">
+      </br>
+      </br>
+      <div class="row">
+        <div class="col-lg-6" style="float:right;">
+          <input class="form-control" type="date" name="timed-content-date" max="9999-12-31">
+          <input class="form-control" type="time" name="timed-content-time">
+        </div>
+        <div class="col-lg-6"><button id="timed-content-btn" class="btn btn-secondary">Time content</button></div>
+        <div class="col-lg-6"><button id="remove-timed-content-btn" class="btn btn-danger">Remove timed content</button></div>
+      </div>
+      </br>
+      <div id="textArea" class="form-control" contenteditable="true"></div></br>
+			<input type="hidden" id="event-description" name="event-description" value="">
+		</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" form="myform" name="event-submit">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $hasTimedContent = false;
+
+  $.get("includes/get-prev-event-info.php", function(data, status){
+    $eventData = JSON.parse(data);
+    $textAreaFullString ="";
+
+    $("input[name='event-location']").val($eventData[0]);
+    $("input[name='event-date']").val($eventData[1]);
+    $("input[name='event-time']").val($eventData[2]);
+    $("input[name='event-description']").val($eventData[3]);
+    $("input[name='event-category']").val($eventData[4]);
+
+    if($eventData[3].includes("TimedDataStart")){
+      $hasTimedContent = true;
+
+      $textAreaStringBefore = $eventData[3]; 
+      $textAreaFirstPart = $textAreaStringBefore.split("TimedDataStart")[0];
+      $middleWithDate = $textAreaStringBefore.split("TimedDataStart")[1];
+      $middleWithDate = $middleWithDate.split("TimedDataStop")[0];
+      $textAreaTimeDate = $middleWithDate.substr(0,12);
+      $textAreaDate = $textAreaTimeDate.substr(0,8);
+      $textAreaDate = $textAreaDate.substr(0,4)+"-"+$textAreaDate.substr(4,2)+"-"+$textAreaDate.substr(6,2);
+      $textAreaTime = $textAreaTimeDate.substr(8,12);
+      $textAreaTime = $textAreaTime.substr(0,2)+":"+$textAreaTime.substr(2,2);
+      $textAreaMiddlePart = $middleWithDate.substr(12, $textAreaStringBefore.length);
+      $textAreaLastPart = $textAreaStringBefore.split("TimedDataStop")[1];
+
+      $textAreaFullString = `${$textAreaFirstPart} <span id='time-tag' style='border-radius: 5px; padding: 2px 2px; background-color:yellow' data-toggle='tooltip' title='Date: ${$textAreaDate} Time: ${$textAreaTime}'> Timed: ${$textAreaMiddlePart} </span> ${$textAreaLastPart}`;
+
+    } else {
+      $textAreaFullString = $eventData[3];
+    }
+
+    $("#textArea").html($textAreaFullString);
+    
+    switch($eventData[4]) {
+      case "Sport":
+        $("#sport-label").addClass( "badge-danger");
+        break;
+      case "Art":
+        $("#art-label").addClass( "badge-danger");
+        break;
+      case "Food":
+        $("#food-label").addClass( "badge-danger");
+      break;
+      case "Learning":
+        $("#learning-label").addClass( "badge-danger");
+        break;
+      default:
+        // code block
+    }
+  });
+
+  $("#textArea").keydown(function(){
+    /*$newValue = $("#textArea").html();
+    $("input[name='event-description']").val($newValue);*/
+
+    //CONVERT TO DATABASE FRIENDLY TAG MUST BE ITS OWN FUNCTION
+  });
+
+  $(".category-label").click(function(){ //change label color when clicked
+    $labelValue = $.trim($(this).text());
+    $("#event-category[value]").val($labelValue); //change hidden input value to that of clicked
+  }); 
+
+  $(".badge").click(function(){ //change label color when clickedW
+    addLabelColor($(this)); 
+  });
+
+  $('#timed-content-btn').on('click', function(event){ //on click input 'timed events' tag
+    event.preventDefault();
+    if($hasTimedContent){
+      alert("You can only time one piece of content. Remove earlier timed content first");
+    } else {
+      highlightTimedContent();
+    }
+  });
+
+  $("#remove-timed-content-btn").click(function(){
+    event.preventDefault();
+    removeTimedTag();
+  });
+
+  function removeTimedTag(){
+    $contentbefore = $("#textArea").html();
+    $contentFirstPart = $contentbefore.split("<span")[0];
+    $contentMiddlePart = $contentbefore.split("Timed: ")[1];
+    $contentMiddlePart = $contentMiddlePart.split("</span>")[0];
+    $contentLastPart = $contentbefore.split("</span>")[1];
+    $contentAfter = $contentFirstPart+$contentMiddlePart+$contentLastPart;
+    $contentAfter = $contentAfter.replace(/\s+/g,' ');
+    $("#textArea").html($contentAfter);
+    $("input[name='event-description']").val($contentAfter);
+    $hasTimedContent = false;
+  }
+
+  $(".time-tag").hover(function(){ //show timed when hover over timed content
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
+  function addLabelColor(clicked){ //change label color when clicked
+    if($(clicked).hasClass("filterBtn")){
+      $(".filterBtn").addClass( "badge-info"); 
+      $(".filterBtn").removeClass( "badge-danger");
+    } else if($(clicked).hasClass("category-label")){
+      $(".category-label").addClass( "badge-info"); 
+      $(".category-label").removeClass( "badge-danger");
+    }
+    $(clicked).addClass( "badge-danger");
+    $(clicked).removeClass( "badge-info");
+  }
+
+  function highlightTimedContent(){
+    if($("input[name='timed-content-date']").val() =="" && $("input[name='timed-content-time']").val() ==""){
+      alert("You need to input a date and time");
+    } else if($("input[name='timed-content-time']").val() ==""){
+      alert("You need to input a time");
+    } else if($("input[name='timed-content-date']").val() ==""){
+      alert("You need to input a date");
+    } else { //if date and input is filled out
+      $date = $("input[name='timed-content-date']").val(); 
+      $time = $("input[name='timed-content-time']").val();
+      $highlightedText = "";
+      
+      $dateTimeTag = `<span id='${$time}${$date}' data-toggle='tooltip' title='Date: ${$date} Time: ${$time}' class='time-tag' style='border-radius: 5px; padding: 2px 2px; background-color:yellow'>Timed: `; //highlight timed content
+
+      $endDelimiter = "</span>";
+      if (window.getSelection) { 
+        $highlightedText = window.getSelection().toString();
+      } else if (document.selection && document.selection.type != "Control") {
+        $highlightedText = document.selection.createRange().text;
+      }
+
+      if ($highlightedText.length > 0){ //if any text was selected
+        $textArea = $("#textArea").html();
+        
+        $firstPart = $textArea.split($highlightedText)[0]; //get text from textfield
+        $firstPartLenght = $firstPart.length;
+        $lastPart = $textArea.split($highlightedText)[1];
+        $txtAreaFullString = $firstPart+$dateTimeTag+$highlightedText+$endDelimiter+$lastPart; 
+
+        $("#textArea").html($txtAreaFullString);
+
+        $date = $date.replace(new RegExp('-', 'g'),"");
+        $time = $time.replace(':', '');
+        $timedDataStart = "TimedDataStart";
+        $timedDateStop = "TimedDataStop";
+
+        $eventDescriptionFullString = $firstPart+" "+$timedDataStart+$date+$time+$highlightedText+" "+$timedDateStop+" "+$lastPart;
+
+        $("input[name='event-description']").val($eventDescriptionFullString);
+        $eventDescriptionFullString = "";
+      } else {} 
+    } //closing tag for date and input check
+  } //function highlightTimedContent end
+
+});
+</script>

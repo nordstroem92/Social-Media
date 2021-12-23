@@ -1,0 +1,7 @@
+<h3>Log me in</h3>
+</br>
+<form class="form-group" action="includes/login-function.php" method="POST">
+	<input id="e-mail" class="form-control" type="text" name="login-email" placeholder="Enter your e-mail"></br>
+	<input id="password" class="form-control" type="password" name="login-password" placeholder="Enter your password"></br>
+	<button id="submit" class="btn btn-info" type="submit" name="login-submit">Log in</button>
+</form>
